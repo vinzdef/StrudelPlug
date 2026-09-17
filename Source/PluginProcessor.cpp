@@ -306,7 +306,6 @@ void StrudelPlugAudioProcessor::createPersistentBrowser()
         options,
         [this] (const juce::String& loadedUrl)
         {
-            setServerUrl (loadedUrl);
             if (auto* ed = activeEditor.load())
                 ed->onBrowserUrlChanged (loadedUrl);
         },
@@ -331,10 +330,12 @@ void StrudelPlugAudioProcessor::createPersistentBrowser()
             }
         });
 
-    auto target = getServerUrl();
-    if (target.trim().isEmpty())
-        target = "https://strudel.cc/";
-    browser->goToURL (target);
+    browser->goToURL (getLocalStrudelUrl());
+}
+
+juce::String StrudelPlugAudioProcessor::getLocalStrudelUrl() const
+{
+    return "http://127.0.0.1:" + juce::String (bridgeServer.getPort()) + "/strudel/";
 }
 
 void StrudelPlugAudioProcessor::restoreBrowserCode (const juce::String& codeToRestore)
@@ -500,7 +501,7 @@ void StrudelPlugAudioProcessor::setServerUrl (const juce::String& url)
 
 juce::String StrudelPlugAudioProcessor::getServerUrl() const
 {
-    return sharedServerUrl.isNotEmpty() ? sharedServerUrl : "https://strudel.cc/";
+    return sharedServerUrl;
 }
 
 void StrudelPlugAudioProcessor::sendMidiRoute (const juce::String& midiRoute)

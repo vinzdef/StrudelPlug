@@ -21,8 +21,7 @@ inline const char* getStrudelPage()
 <body>
 <strudel-editor>
 <!--
-// offline: synth sounds only, samples need internet
-note("c3 eb3 g3 bb3").s("sawtooth").lpf(800)
+silence
 -->
 </strudel-editor>
 <script src="index.js"></script>
@@ -63,7 +62,7 @@ inline const char* getStrudelMissingPage()
 <main>
   <h1>Strudel is not installed</h1>
   <p>The local Strudel build has not been downloaded yet, so this page cannot run.</p>
-  <p>Press <code>Get</code> in the plugin toolbar (next to <code>Local</code>) to fetch
+  <p>Open settings (<code>&#9881;</code>, top right of the plugin) and press <code>&#8595;</code> to fetch
      the latest <code>@strudel/repl</code> from npm. It is stored once and works offline afterwards.</p>
   <p>Strudel is AGPL and is not bundled with the plugin.</p>
 </main>

@@ -61,6 +61,7 @@ public:
     // Strudel session helpers
     void setServerUrl (const juce::String& url);
     juce::String getServerUrl() const;
+    juce::String getLocalStrudelUrl() const;   // the only page the browser ever shows
     void setCode (const juce::String& newCode);
     juce::String getCode() const;
     void evaluateCode();
