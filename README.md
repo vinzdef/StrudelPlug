@@ -112,6 +112,13 @@ For in-depth architecture details, real-time safety, lookahead scheduling, and p
 
 ## License
 
-MIT License. See [LICENSE](LICENSE) for details.
-Built with JUCE 7 & Strudel.
+GNU Affero General Public License v3.0 (AGPL-3.0-or-later). See [LICENSE](LICENSE) for the full text.
+
+This is the same license as [Strudel](https://github.com/tidalcycles/strudel). Versions up to 1.0.9 were released under the MIT license; that grant remains valid for those earlier releases.
+
+Third-party components and their licenses:
+
+- [JUCE 8](https://juce.com) — AGPLv3 (open-source option of the dual AGPLv3 / commercial license). Its bundled dependencies (zlib, pnglib, jpeglib, FLAC, Ogg Vorbis, HarfBuzz, SheenBidi, AudioUnitSDK, VST3 SDK, CHOC, LV2) are all under AGPL-compatible permissive licenses (zlib, BSD, MIT, ISC, Apache 2.0).
+- [Strudel](https://github.com/tidalcycles/strudel) — AGPLv3. Not bundled; the `@strudel/repl` package is downloaded at runtime from the npm registry into the user's app-data directory.
+- Platform web views (WKWebView, WebView2, WebKitGTK) are used as system libraries and are not part of this distribution.
 
