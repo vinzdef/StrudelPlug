@@ -64,7 +64,6 @@ public:
     void setCode (const juce::String& newCode);
     juce::String getCode() const;
     void evaluateCode();
-    bool startLocalServer (const juce::String& localStrudelPath = {});
     bool connectRemoteServer (const juce::String& remoteUrl);
     juce::String joinExistingSession();
     juce::String getServerStatus() const;
@@ -113,7 +112,6 @@ private:
     static juce::String sharedServerUrl;
     static juce::String sharedSessionId;
     static bool sharedServerStarted;
-    static std::unique_ptr<juce::ChildProcess> localServerProcess;
 
     bool sendHttpRequest (const juce::String& url, const juce::String& payload, juce::String& response);
     juce::String shellQuote (const juce::String& value) const;

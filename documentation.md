@@ -86,11 +86,12 @@ $: chord("<Cm7 Fm7 Gm7 Cm7>").voicing().midi()
 - **URL Editor**: Input and navigate to any web sequencer or local web server.
 - **Quick Preset Buttons**:
   - `strudel.cc`: Instantly loads the official cloud Strudel web application.
-  - `Local :54321`: Navigates to a local Strudel server running on `http://127.0.0.1:54321`.
-  - **`▶ Start Node`**: Automatically spawns an offline local Strudel server using Node.js (`npx -y @strudel/repl --port 54321`) in an internal background subprocess and points the plugin to it.
-    - **100% Offline Capability**: Compose and live-code anywhere without an active internet connection.
-    - **Direct Binary WebSockets**: Bypasses browser HTTPS Mixed Content limitations, unlocking direct binary socket streaming without base64 encoding overhead.
-    - *Requirement*: Node.js and `npm`/`npx` installed on your machine.
+  - **`Local`**: Loads the Strudel REPL from the plugin's own bridge server (`http://127.0.0.1:<bridge port>/strudel/`).
+    - **First click downloads Strudel**: the `@strudel/repl` build (`index.js` + workers) is fetched from jsDelivr into the user app-data directory (`StrudelPlug/strudel`) and cached. Status bar shows `FETCHING STRUDEL...` then `STRUDEL READY`. Delete that directory to force an update.
+    - **Offline afterwards**: synth sounds work without internet; sample packs still need a connection.
+    - **MIDI input works**: the page is plain `http`, so the bridge script can open the MIDI-in WebSocket that `https://strudel.cc` blocks as mixed content.
+    - **Code persistence**: the page asks the plugin for the code saved in the DAW project once the editor is ready.
+    - *Licensing*: Strudel is AGPL and is not bundled with the plugin; it is only downloaded at runtime. No Node.js required.
 
 ### 3.2 Bottom Status & Telemetry Bar
 - **SYNC DAW Button**: Toggles automatic transport synchronization with the DAW.

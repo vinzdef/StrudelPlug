@@ -12,7 +12,6 @@
 juce::String StrudelPlugAudioProcessor::sharedServerUrl;
 juce::String StrudelPlugAudioProcessor::sharedSessionId;
 bool StrudelPlugAudioProcessor::sharedServerStarted = false;
-std::unique_ptr<juce::ChildProcess> StrudelPlugAudioProcessor::localServerProcess;
 
 //==============================================================================
 StrudelPlugAudioProcessor::StrudelPlugAudioProcessor()
@@ -281,6 +280,10 @@ void StrudelPlugAudioProcessor::createPersistentBrowser()
                              bridgeServer.injectMidiFromBrowser (status, d1, d2);
                          }
                      })
+                     .withEventListener ("requestCode", [this] (const juce::var&)
+                     {
+                         restoreBrowserCode (code);
+                     })
                      .withEventListener ("saveCode", [this] (const juce::var& data)
                      {
                          if (auto* obj = data.getDynamicObject())
@@ -450,37 +453,6 @@ void StrudelPlugAudioProcessor::evaluateCode()
         serverStatus = "No Strudel server";
     else
         sendHttpRequest (sharedServerUrl + "/api/evaluate", code, serverStatus);
-}
-
-bool StrudelPlugAudioProcessor::startLocalServer (const juce::String& localStrudelPath)
-{
-    if (localServerProcess != nullptr && localServerProcess->isRunning())
-    {
-        sharedServerUrl = "http://127.0.0.1:54321";
-        serverStatus = "Local Strudel server running on :54321";
-        return true;
-    }
-
-    juce::String command;
-    if (localStrudelPath.trim().isNotEmpty())
-        command = "node " + localStrudelPath.trim() + " --port 54321";
-    else
-        command = "npx -y @strudel/repl --port 54321";
-
-    serverStatus = "Launching local Strudel server...";
-
-    localServerProcess = std::make_unique<juce::ChildProcess>();
-    if (localServerProcess->start (command) && localServerProcess->isRunning())
-    {
-        sharedServerStarted = true;
-        sharedServerUrl = "http://127.0.0.1:54321";
-        sharedSessionId = "local-" + juce::String (juce::Time::getMillisecondCounterHiRes());
-        serverStatus = "Local Strudel server running on :54321";
-        return true;
-    }
-
-    serverStatus = "Cannot start local Strudel server";
-    return false;
 }
 
 bool StrudelPlugAudioProcessor::connectRemoteServer (const juce::String& newRemoteUrl)

@@ -9,6 +9,7 @@
 
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
+#include "StrudelFetch.h"
 
 //==============================================================================
 StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAudioProcessor& p)
@@ -38,23 +39,39 @@ StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAud
     goButton.onClick      = [this] { navigateTo (urlEditor.getText().trim()); };
 
     strudelCcBtn.onClick       = [this] { navigateTo ("https://strudel.cc/"); };
-    localPort54321Btn.onClick  = [this] { navigateTo ("http://127.0.0.1:54321"); };
-    startNodeBtn.onClick       = [this]
+    // Bundled Strudel served by the plugin's own bridge server: no internet, and
+    // being plain http the page can open the MIDI-in WebSocket (https pages can't).
+    localBtn.onClick         = [this]
     {
-        statusLabel.setText ("STARTING NODE...", juce::dontSendNotification);
+        const auto url = "http://127.0.0.1:" + juce::String (audioProcessor.getBridgeServer().getPort()) + "/strudel/";
+        if (StrudelFetch::isInstalled())
+        {
+            navigateTo (url);
+            return;
+        }
+
+        statusLabel.setText ("FETCHING STRUDEL...", juce::dontSendNotification);
         statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffffb703));
-        bool ok = audioProcessor.startLocalServer();
-        if (ok)
+        localBtn.setEnabled (false);
+
+        juce::Component::SafePointer<StrudelPlugAudioProcessorEditor> self (this);
+        StrudelFetch::downloadAsync ([self, url] (bool ok, juce::String error)
         {
-            statusLabel.setText ("NODE :54321 OK", juce::dontSendNotification);
-            statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xff38ef7d));
-            navigateTo ("http://127.0.0.1:54321");
-        }
-        else
-        {
-            statusLabel.setText ("START FAILED", juce::dontSendNotification);
-            statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffff5555));
-        }
+            if (self == nullptr)
+                return;
+            self->localBtn.setEnabled (true);
+            if (ok)
+            {
+                self->statusLabel.setText ("STRUDEL READY", juce::dontSendNotification);
+                self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xff38ef7d));
+                self->navigateTo (url);
+            }
+            else
+            {
+                self->statusLabel.setText ("FETCH FAILED: " + error.toUpperCase(), juce::dontSendNotification);
+                self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffff5555));
+            }
+        });
     };
 
     // =========================================================================
@@ -229,7 +246,7 @@ StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAud
     const auto cyanGlow    = juce::Colour (0xff00f4f4);
     const auto darkTeal    = juce::Colour (0xff082f36);
 
-    for (auto* b : { &backButton, &forwardButton, &reloadButton, &localPort54321Btn, &strudelCcBtn })
+    for (auto* b : { &backButton, &forwardButton, &reloadButton, &strudelCcBtn })
     {
         b->setColour (juce::TextButton::buttonColourId, darkBtnCol);
         b->setColour (juce::TextButton::textColourOffId, textCol);
@@ -240,9 +257,9 @@ StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAud
     goButton.setColour (juce::TextButton::textColourOffId, cyanGlow);
     addAndMakeVisible (goButton);
 
-    startNodeBtn.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff123e20));
-    startNodeBtn.setColour (juce::TextButton::textColourOffId, juce::Colour (0xff6ee7b7));
-    addAndMakeVisible (startNodeBtn);
+    localBtn.setColour (juce::TextButton::buttonColourId, juce::Colour (0xff123e20));
+    localBtn.setColour (juce::TextButton::textColourOffId, juce::Colour (0xff6ee7b7));
+    addAndMakeVisible (localBtn);
 
     for (auto* cb : { &srComboBox, &cushionComboBox })
     {
@@ -405,9 +422,8 @@ void StrudelPlugAudioProcessorEditor::resized()
     forwardButton.setBounds (navRow.removeFromLeft (26).reduced (1, 0));
     reloadButton.setBounds (navRow.removeFromLeft (26).reduced (1, 0));
 
-    // Navigation Right: Start Node, Local :54321, strudel.cc, Status, Go
-    startNodeBtn.setBounds (navRow.removeFromRight (95).reduced (2, 0));
-    localPort54321Btn.setBounds (navRow.removeFromRight (85).reduced (2, 0));
+    // Navigation Right: Local, strudel.cc, Status, Go
+    localBtn.setBounds (navRow.removeFromRight (70).reduced (2, 0));
     strudelCcBtn.setBounds (navRow.removeFromRight (75).reduced (2, 0));
     statusLabel.setBounds (navRow.removeFromRight (140).reduced (2, 0));
     goButton.setBounds (navRow.removeFromRight (40).reduced (2, 0));

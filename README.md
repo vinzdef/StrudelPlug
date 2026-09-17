@@ -36,13 +36,13 @@ Designed for live coders and electronic music producers, StrudelPlug eliminates 
   - Toggle off for free-running live coding independent of DAW transport.
 - **Full DAW Project State Persistence (v1.0.9+)**: Live code typed into Strudel, target server URL, SYNC DAW toggle, sample rate, cushion size, and gain trim are automatically saved into your DAW project file and seamlessly restored upon opening.
 - **Ultra-Low CPU Architecture (v1.0.9+)**: 512-sample frame batching cuts WebKit IPC overhead by 75%, while an intelligent 500ms silence hangover drops CPU usage to **~0%** when DAW transport is stopped.
-- **Offline Node.js Server (`▶ Start Node`)**: Spawns a local Strudel REPL server in an internal background process with a single click, enabling 100% offline live coding and direct binary WebSocket streaming without HTTPS restrictions.
+- **Local Strudel (`Local`)**: Serves the Strudel REPL from the plugin's own bridge server over plain `http`, so the page can open the MIDI-in WebSocket that `https://strudel.cc` refuses. The `@strudel/repl` build is downloaded once on first click into the user's app-data directory (`StrudelPlug/strudel`) and works offline afterwards (synth sounds only; samples still need internet). Strudel is AGPL and is not bundled with the plugin; delete that directory to force an update.
 - **Extended Buffer Options (up to 16384 samples)**:
   - Selectable buffer cushion: `128`, `256`, `512`, `720` (15ms), `1024`, `2048`, `4096`, `8192`, `12000`, and `16384` samples (~340ms).
   - Real-time digital LCD telemetry display showing sample rate, transport state, output dB level, and buffer status.
 - **Transient De-Clicking**: Soft micro-fade on startup and buffer flushes eliminates DC offset clicks and digital pops.
 - **OpenSynth1 Aesthetic**: Sleek dark titanium hardware finish with cyan digital LCD readouts, dedicated options strip with real-time audio volume and MIDI activity LEDs, and output gain trim slider (-24 dB to +6 dB).
-- **Navigation Controls**: Address bar, Back/Forward/Reload buttons, quick presets (`strudel.cc`, local Node server `:54321`), and local server launcher (`▶ Start Node`).
+- **Navigation Controls**: Address bar, Back/Forward/Reload buttons, and quick presets (`strudel.cc`, `Local`).
 
 ---
 

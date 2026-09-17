@@ -44,8 +44,7 @@ private:
 
     // Preset quick buttons
     juce::TextButton strudelCcBtn { "strudel.cc" };
-    juce::TextButton localPort54321Btn { "Local :54321" };
-    juce::TextButton startNodeBtn { "▶ Start Node" };
+    juce::TextButton localBtn { "Local" };
 
     juce::Label statusLabel;
 
