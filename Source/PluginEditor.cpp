@@ -45,34 +45,25 @@ StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAud
     {
         const auto url = "http://127.0.0.1:" + juce::String (audioProcessor.getBridgeServer().getPort()) + "/strudel/";
         if (StrudelFetch::isInstalled())
-        {
             navigateTo (url);
-            return;
-        }
+        else
+            fetchStrudel ([this, url] { navigateTo (url); });
+    };
 
-        statusLabel.setText ("FETCHING STRUDEL...", juce::dontSendNotification);
-        statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffffb703));
-        localBtn.setEnabled (false);
-
-        juce::Component::SafePointer<StrudelPlugAudioProcessorEditor> self (this);
-        StrudelFetch::downloadAsync ([self, url] (bool ok, juce::String error)
+    // Get / Update: always re-downloads the latest @strudel/repl, then reloads
+    // the page if it is currently showing the local build.
+    fetchBtn.setTooltip ("Download or update the local Strudel build from npm");
+    fetchBtn.onClick = [this]
+    {
+        fetchStrudel ([this]
         {
-            if (self == nullptr)
-                return;
-            self->localBtn.setEnabled (true);
-            if (ok)
-            {
-                self->statusLabel.setText ("STRUDEL READY", juce::dontSendNotification);
-                self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xff38ef7d));
-                self->navigateTo (url);
-            }
-            else
-            {
-                self->statusLabel.setText ("FETCH FAILED: " + error.toUpperCase(), juce::dontSendNotification);
-                self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffff5555));
-            }
+            const auto current = urlEditor.getText().trim();
+            if (current.startsWith ("http://127.0.0.1:") && current.endsWith ("/strudel/"))
+                if (auto* b = audioProcessor.getBrowser())
+                    b->goToURL (current);
         });
     };
+    updateFetchButtonAppearance();
 
     // =========================================================================
     // Options Strip Setup
@@ -261,6 +252,10 @@ StrudelPlugAudioProcessorEditor::StrudelPlugAudioProcessorEditor (StrudelPlugAud
     localBtn.setColour (juce::TextButton::textColourOffId, juce::Colour (0xff6ee7b7));
     addAndMakeVisible (localBtn);
 
+    fetchBtn.setColour (juce::TextButton::buttonColourId, darkBtnCol);
+    fetchBtn.setColour (juce::TextButton::textColourOffId, juce::Colour (0xff6ee7b7));
+    addAndMakeVisible (fetchBtn);
+
     for (auto* cb : { &srComboBox, &cushionComboBox })
     {
         cb->setColour (juce::ComboBox::backgroundColourId, juce::Colour (0xff12141c));
@@ -324,6 +319,40 @@ void StrudelPlugAudioProcessorEditor::onBrowserUrlChanged (const juce::String& u
     urlEditor.setText (url, false);
     statusLabel.setText ("ONLINE: AUDIO+MIDI", juce::dontSendNotification);
     statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xff00f4f4));
+}
+
+void StrudelPlugAudioProcessorEditor::updateFetchButtonAppearance()
+{
+    fetchBtn.setButtonText (StrudelFetch::isInstalled() ? "Update" : "Get");
+}
+
+void StrudelPlugAudioProcessorEditor::fetchStrudel (std::function<void()> onDone)
+{
+    statusLabel.setText ("FETCHING STRUDEL...", juce::dontSendNotification);
+    statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffffb703));
+    localBtn.setEnabled (false);
+    fetchBtn.setEnabled (false);
+
+    juce::Component::SafePointer<StrudelPlugAudioProcessorEditor> self (this);
+    StrudelFetch::downloadAsync ([self, onDone] (bool ok, juce::String error)
+    {
+        if (self == nullptr)
+            return;
+        self->localBtn.setEnabled (true);
+        self->fetchBtn.setEnabled (true);
+        self->updateFetchButtonAppearance();
+        if (ok)
+        {
+            self->statusLabel.setText ("STRUDEL READY", juce::dontSendNotification);
+            self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xff38ef7d));
+            if (onDone) onDone();
+        }
+        else
+        {
+            self->statusLabel.setText ("FETCH FAILED: " + error.toUpperCase(), juce::dontSendNotification);
+            self->statusLabel.setColour (juce::Label::textColourId, juce::Colour (0xffff5555));
+        }
+    });
 }
 
 void StrudelPlugAudioProcessorEditor::updateSyncButtonAppearance()
@@ -422,7 +451,8 @@ void StrudelPlugAudioProcessorEditor::resized()
     forwardButton.setBounds (navRow.removeFromLeft (26).reduced (1, 0));
     reloadButton.setBounds (navRow.removeFromLeft (26).reduced (1, 0));
 
-    // Navigation Right: Local, strudel.cc, Status, Go
+    // Navigation Right: Get/Update, Local, strudel.cc, Status, Go
+    fetchBtn.setBounds (navRow.removeFromRight (64).reduced (2, 0));
     localBtn.setBounds (navRow.removeFromRight (70).reduced (2, 0));
     strudelCcBtn.setBounds (navRow.removeFromRight (75).reduced (2, 0));
     statusLabel.setBounds (navRow.removeFromRight (140).reduced (2, 0));

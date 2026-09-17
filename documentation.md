@@ -87,7 +87,9 @@ $: chord("<Cm7 Fm7 Gm7 Cm7>").voicing().midi()
 - **Quick Preset Buttons**:
   - `strudel.cc`: Instantly loads the official cloud Strudel web application.
   - **`Local`**: Loads the Strudel REPL from the plugin's own bridge server (`http://127.0.0.1:<bridge port>/strudel/`).
-    - **First click downloads Strudel**: the `@strudel/repl` build (`index.js` + workers) is fetched from jsDelivr into the user app-data directory (`StrudelPlug/strudel`) and cached. Status bar shows `FETCHING STRUDEL...` then `STRUDEL READY`. Delete that directory to force an update.
+    - **First click downloads Strudel**: the latest `@strudel/repl` package tarball is fetched from the npm registry, its `dist/` folder unpacked into the user app-data directory (`StrudelPlug/strudel`) and cached. Status bar shows `FETCHING STRUDEL...` then `STRUDEL READY`.
+    - **`Get` / `Update` button** (right of `Local`): re-downloads the latest release on demand; if the local page is open it reloads afterwards. Label reads `Get` until a build is installed.
+    - **Not installed yet**: requesting `/strudel/` before any download serves a warning page pointing at `Get` instead of a blank editor.
     - **Offline afterwards**: synth sounds work without internet; sample packs still need a connection.
     - **MIDI input works**: the page is plain `http`, so the bridge script can open the MIDI-in WebSocket that `https://strudel.cc` blocks as mixed content.
     - **Code persistence**: the page asks the plugin for the code saved in the DAW project once the editor is ready.

@@ -745,7 +745,9 @@ p { color: #94a3b8; font-size: 14px; line-height: 1.6; }
         // build itself is downloaded on first use (StrudelFetch.h) and served from disk.
         if (path == "/strudel/" || path == "/strudel/index.html")
         {
-            sendHttpResponse(socket, 200, "OK", "text/html; charset=utf-8", WebBridge::getStrudelPage());
+            sendHttpResponse(socket, 200, "OK", "text/html; charset=utf-8",
+                             StrudelFetch::isInstalled() ? WebBridge::getStrudelPage()
+                                                         : WebBridge::getStrudelMissingPage());
             return;
         }
         if (path.startsWith("/strudel/"))

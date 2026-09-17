@@ -45,8 +45,12 @@ private:
     // Preset quick buttons
     juce::TextButton strudelCcBtn { "strudel.cc" };
     juce::TextButton localBtn { "Local" };
+    juce::TextButton fetchBtn;   // "Get" / "Update": (re)downloads @strudel/repl from npm
 
     juce::Label statusLabel;
+
+    void fetchStrudel (std::function<void()> onDone);
+    void updateFetchButtonAppearance();
 
     // --- Options Strip Controls ---
     juce::TextButton syncDawBtn { "● SYNC DAW" };
