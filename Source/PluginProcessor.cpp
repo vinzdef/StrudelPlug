@@ -27,8 +27,10 @@ StrudelPlugAudioProcessor::StrudelPlugAudioProcessor()
                        )
 #endif
 {
+   #if JUCE_LINUX
     setenv ("WEBKIT_DISABLE_DMABUF_RENDERER", "1", 1);
     setenv ("WEBKIT_DISABLE_COMPOSITING_MODE", "1", 1);
+   #endif
 
     bridgeServer.startServer();
 }
@@ -252,7 +254,9 @@ void StrudelPlugAudioProcessor::createPersistentBrowser()
     juce::WebBrowserComponent::Options options;
     options = options.withNativeIntegrationEnabled (true)
                      .withKeepPageLoadedWhenBrowserIsHidden()
+                    #if JUCE_LINUX
                      .withUserAgent ("Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/128.0.0.0 Safari/537.36")
+                    #endif
                      .withUserScript (WebBridge::getInjectionScript (bridgeServer.getPort(), getEffectiveSampleRate(), 512, lastDawBpm.load()))
                      .withEventListener ("dawAudioData", [this] (const juce::var& data)
                      {
